@@ -2,8 +2,9 @@
 # -*- coding: utf-8 -*-
 
 import sys
-from io import BytesIO
 from collections import OrderedDict
+from io import BytesIO
+
 import click
 from github3 import GitHub
 
@@ -40,7 +41,7 @@ def html_escape(text):
 @click.command()
 @click.option('--username', envvar='USER', help='GitHub username')
 @click.option('--token', envvar='GITHUB_TOKEN', help='GitHub token')
-@click.option('--sort',  is_flag=True, help='sort by language')
+@click.option('--sort',  is_flag=True, help='sort by language and name')
 @click.option('--repository', default='', help='repository name')
 @click.option('--message', default='update stars', help='commit message')
 @click.version_option(version='1.3.1', prog_name='starred')
@@ -71,7 +72,7 @@ def starred(username, token, sort, repository, message):
         description = html_escape(s.description).replace('\n', '') if s.description else ''
         if language not in repo_dict:
             repo_dict[language] = []
-        repo_dict[language].append([s.full_name, s.name, s.html_url, description.strip()])
+        repo_dict[language].append([s.full_name, s.name, s.html_url, description.strip(), s.homepage or ''])
 
     if sort:
         repo_dict = OrderedDict(sorted(repo_dict.items(), key=lambda l: l[0]))
@@ -86,7 +87,7 @@ def starred(username, token, sort, repository, message):
     for language in repo_dict:
         click.echo('## {} \n'.format(language.replace('#', '# #')))
         for repo in repo_dict[language]:
-            data = u'* [{0}]({2}) - {3}'.format(*repo)
+            data = u'* [{0}]({2}) - {3} [{4}]({4})'.format(*repo)
             click.echo(data)
         click.echo('')
 
