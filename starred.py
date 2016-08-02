@@ -7,7 +7,6 @@ from collections import OrderedDict
 import click
 from github3 import GitHub
 
-
 desc = '''# Awesome Stars [![Awesome](https://cdn.rawgit.com/sindresorhus/awesome/d730\
 5f38d29fed78fa85652e3a63e154dd8e8829/media/badge.svg)](https://github.com/sindresorhus/awesome)
 
@@ -72,10 +71,12 @@ def starred(username, token, sort, repository, message):
         description = html_escape(s.description).replace('\n', '') if s.description else ''
         if language not in repo_dict:
             repo_dict[language] = []
-        repo_dict[language].append([s.name, s.html_url, description.strip()])
+        repo_dict[language].append([s.full_name, s.name, s.html_url, description.strip()])
 
     if sort:
         repo_dict = OrderedDict(sorted(repo_dict.items(), key=lambda l: l[0]))
+        for language in repo_dict:
+            repo_dict[language] = sorted(repo_dict[language], key=lambda l: l[1])
 
     for language in repo_dict.keys():
         data = u'  - [{}](#{})'.format(language, '-'.join(language.lower().split()))
@@ -85,7 +86,7 @@ def starred(username, token, sort, repository, message):
     for language in repo_dict:
         click.echo('## {} \n'.format(language.replace('#', '# #')))
         for repo in repo_dict[language]:
-            data = u'- [{}]({}) - {}'.format(*repo)
+            data = u'* [{0}]({2}) - {3}'.format(*repo)
             click.echo(data)
         click.echo('')
 
